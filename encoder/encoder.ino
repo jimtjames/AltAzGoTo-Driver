@@ -227,7 +227,7 @@ void align() {
             //Serial.println("Star 1 Noted");
             star1_alt = ((degrees_alt_obj) + (arcminutes_alt_obj/60.0) + (arcseconds_alt_obj/3600.0)) * (RATIO_ALT*2400.0)/(360);
             star1_alt_obs = cur_encoder_alt;
-            Serial.println("\n" + String(star1_az) + ", " + String(star1_alt));
+            //Serial.println("\n" + String(star1_az) + ", " + String(star1_alt));
             counter++;
           }
           else if(counter==1){
@@ -239,7 +239,7 @@ void align() {
           else {
             star3_alt = ((degrees_alt_obj) + (arcminutes_alt_obj/60.0) + (arcseconds_alt_obj/3600.0)) * (RATIO_ALT*2400.0)/(360);
             star3_alt_obs = cur_encoder_alt;
-            Serial.println("\n" + String(star3_az) + ", " + String(star3_alt));
+            //Serial.println("\n" + String(star3_az) + ", " + String(star3_alt));
             //Create the aligning matrix thing
             create_transformation_matrix();
             //Serial.println("Align complete!");
@@ -265,7 +265,7 @@ void loop() {
   arcminutes_alt = fmod(cur_encoder_alt_corrected * 360 / (RATIO_ALT * 2400.0) * 60,60);
   arcseconds_alt = (int) (fmod(cur_encoder_alt_corrected * 360 / (RATIO_ALT * 2400.0) * 3600,60) + .5) % 60;
 
-  actual_enc_az = ONE_ROTATION-cur_encoder_az_corrected;
+  actual_enc_az = cur_encoder_az_corrected;
   
   //Encoder ticks to hours, minutes, seconds for azimuth measurement
   hours_az = actual_enc_az * 24 / (RATIO_ALT * 2400.0);
@@ -371,7 +371,7 @@ void transform_encoder_readings() {
   uint32_t actual_enc_az = ONE_ROTATION-encoder_az;
   uint32_t cur_enc_alt = encoder_alt;
   //Serial.println(String(cur_enc_alt) + " ticks alt, " + String(actual_enc_az) + " ticks az");
-
+  /*
   p11=1;
   p12=0;
   p13=0;
@@ -381,6 +381,7 @@ void transform_encoder_readings() {
   p31=0;
   p32=0;
   p33=1;
+  */
   //Locally convert star variables to radians
   double encoder_alt_rad = cur_enc_alt/2400.0/RATIO_ALT * 2 * PI;
   double encoder_az_rad = actual_enc_az/2400.0/RATIO_AZ * 2 * PI;
@@ -487,13 +488,13 @@ void create_transformation_matrix() {
    */
    
   p11 = (s1f*s2e*s3a - s1e*s2f*s3a - s1f*s2a*s3e + s1a*s2f*s3e + s1e*s2a*s3f - s1a*s2e*s3f)/(s1f*s2e*s3d - s1e*s2f*s3d - s1f*s2d*s3e + s1d*s2f*s3e + s1e*s2d*s3f - s1d*s2e*s3f);
-  p12 = (s1f*s2d*s3a - s1d*s2f*s3a - s1f*s2a*s3d + s1a*s2f*s3d + s1d*s2a*s3f - s1a*s2d*s3f)/(-(s1f*s2e*s3d) + s1e*s2f*s3d + s1f*s2d*s3e - s1d*s2f*s3e - s1e*s2d*s3f + s1d*s2e*s3f);
+  p12 = (s1f*s2d*s3a - s1d*s2f*s3a - s1f*s2a*s3d + s1a*s2f*s3d + s1d*s2a*s3f - s1a*s2d*s3f)/(-1*(s1f*s2e*s3d) + s1e*s2f*s3d + s1f*s2d*s3e - s1d*s2f*s3e - s1e*s2d*s3f + s1d*s2e*s3f);
   p13 = (s1e*s2d*s3a - s1d*s2e*s3a - s1e*s2a*s3d + s1a*s2e*s3d + s1d*s2a*s3e - s1a*s2d*s3e)/(s1f*s2e*s3d - s1e*s2f*s3d - s1f*s2d*s3e + s1d*s2f*s3e + s1e*s2d*s3f - s1d*s2e*s3f);
   p21 = (s1f*s2e*s3b - s1e*s2f*s3b - s1f*s2b*s3e + s1b*s2f*s3e + s1e*s2b*s3f - s1b*s2e*s3f)/(s1f*s2e*s3d - s1e*s2f*s3d - s1f*s2d*s3e + s1d*s2f*s3e + s1e*s2d*s3f - s1d*s2e*s3f);
-  p22 = (s1f*s2d*s3b - s1d*s2f*s3b - s1f*s2b*s3d + s1b*s2f*s3d + s1d*s2b*s3f - s1b*s2d*s3f)/(-(s1f*s2e*s3d) + s1e*s2f*s3d + s1f*s2d*s3e - s1d*s2f*s3e - s1e*s2d*s3f + s1d*s2e*s3f);
+  p22 = (s1f*s2d*s3b - s1d*s2f*s3b - s1f*s2b*s3d + s1b*s2f*s3d + s1d*s2b*s3f - s1b*s2d*s3f)/(-1*(s1f*s2e*s3d) + s1e*s2f*s3d + s1f*s2d*s3e - s1d*s2f*s3e - s1e*s2d*s3f + s1d*s2e*s3f);
   p23 = (s1e*s2d*s3b - s1d*s2e*s3b - s1e*s2b*s3d + s1b*s2e*s3d + s1d*s2b*s3e - s1b*s2d*s3e)/(s1f*s2e*s3d - s1e*s2f*s3d - s1f*s2d*s3e + s1d*s2f*s3e + s1e*s2d*s3f - s1d*s2e*s3f);
   p31 = (s1f*s2e*s3c - s1e*s2f*s3c - s1f*s2c*s3e + s1c*s2f*s3e + s1e*s2c*s3f - s1c*s2e*s3f)/(s1f*s2e*s3d - s1e*s2f*s3d - s1f*s2d*s3e + s1d*s2f*s3e + s1e*s2d*s3f - s1d*s2e*s3f);
-  p32 = (s1f*s2d*s3c - s1d*s2f*s3c - s1f*s2c*s3d + s1c*s2f*s3d + s1d*s2c*s3f - s1c*s2d*s3f)/(-(s1f*s2e*s3d) + s1e*s2f*s3d + s1f*s2d*s3e - s1d*s2f*s3e - s1e*s2d*s3f + s1d*s2e*s3f);
+  p32 = (s1f*s2d*s3c - s1d*s2f*s3c - s1f*s2c*s3d + s1c*s2f*s3d + s1d*s2c*s3f - s1c*s2d*s3f)/(-1*(s1f*s2e*s3d) + s1e*s2f*s3d + s1f*s2d*s3e - s1d*s2f*s3e - s1e*s2d*s3f + s1d*s2e*s3f);
   p33 = (s1e*s2d*s3c - s1d*s2e*s3c - s1e*s2c*s3d + s1c*s2e*s3d + s1d*s2c*s3e - s1c*s2d*s3e)/(s1f*s2e*s3d - s1e*s2f*s3d - s1f*s2d*s3e + s1d*s2f*s3e + s1e*s2d*s3f - s1d*s2e*s3f);
 }
 
